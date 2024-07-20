@@ -8,22 +8,22 @@ import platform
 import subprocess
 from datetime import datetime, timedelta
 
-# Ensure the Tesseract path is correctly set
-if platform.system() == "Windows":
-    pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
-else:
-    pytesseract.pytesseract.tesseract_cmd = r'/usr/bin/tesseract'
+base_dir = os.path.dirname(os.path.abspath(__file__))
 
+# Set Tesseract path
+pytesseract.pytesseract.tesseract_cmd = os.path.join(base_dir, 'tesseract', 'tesseract.exe')
+
+# Set FFmpeg path
+ffmpeg_path = os.path.join(base_dir, 'ffmpeg', 'ffmpeg.exe')
 
 def convert_to_h264(input_video_path, output_video_path):
     command = [
-        'ffmpeg', '-y',
+        ffmpeg_path, '-y',
         '-i', input_video_path,
         '-c:v', 'libx264',
         output_video_path
     ]
     subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-
 
 def get_time_from_frame(img):
     custom_config = r'--oem 3 --psm 6'
@@ -34,7 +34,6 @@ def get_time_from_frame(img):
         return res.group(0)
     return None
 
-
 def get_initial_time(video_path):
     vid = cv2.VideoCapture(video_path)
     vid.set(cv2.CAP_PROP_POS_FRAMES, 0)  # Start at the first frame
@@ -43,7 +42,6 @@ def get_initial_time(video_path):
     if is_success:
         return get_time_from_frame(img)
     return None
-
 
 def get_video_end_time(video_path):
     vid = cv2.VideoCapture(video_path)
@@ -54,7 +52,6 @@ def get_video_end_time(video_path):
     if is_success:
         return get_time_from_frame(img)
     return None
-
 
 def main():
     st.set_page_config(page_title="Video Player", page_icon="📹", layout="centered")
@@ -162,7 +159,6 @@ def main():
                 st.write("CSV file is empty.")
     else:
         st.write("Upload a video file to start.")
-
 
 if __name__ == "__main__":
     main()
